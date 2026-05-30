@@ -1,0 +1,39 @@
+name: Mettre à jour la date de modification
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Mettre à jour la date dans index.html
+        run: |
+          DATE=$(TZ="America/Montreal" date "+%d %B %Y à %Hh%M" | sed \
+            -e 's/January/janvier/' \
+            -e 's/February/février/' \
+            -e 's/March/mars/' \
+            -e 's/April/avril/' \
+            -e 's/May/mai/' \
+            -e 's/June/juin/' \
+            -e 's/July/juillet/' \
+            -e 's/August/août/' \
+            -e 's/September/septembre/' \
+            -e 's/October/octobre/' \
+            -e 's/November/novembre/' \
+            -e 's/December/décembre/' \
+            -e 's/^0//')
+          sed -i "s|<span id=\"date-modif\">[^<]*</span>|<span id=\"date-modif\">${DATE}</span>|" index.html
+
+      - name: Commiter la mise à jour
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --staged --quiet || git commit -m "mise à jour de la date de modification"
+          git push
